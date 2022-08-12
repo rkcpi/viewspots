@@ -9,7 +9,8 @@ module.exports = {
     'plugin:@typescript-eslint/recommended',
   ],
   "rules": {
-    "object-curly-spacing": [2, "always"],
-    "quotes": [2, "single"]
+    "object-curly-spacing": ["error", "always"],
+    "quotes": ["error", "single"],
+    "comma-spacing": ["error", { "before": false, "after": true }]
   }
 };
