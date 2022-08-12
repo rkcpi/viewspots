@@ -1,0 +1,30 @@
+{
+  "name": "viewspots",
+  "version": "1.0.0",
+  "description": "Solution to the view spots finder problem",
+  "main": "index.js",
+  "repository": "git@github.com:rkcpi/viewspots.git",
+  "author": "Sandra Thieme <thieme.sandra@gmail.com>",
+  "license": "MIT",
+  "scripts": {
+    "build": "npx tsc",
+    "test": "npx ts-mocha test/*",
+    "lint": "npx eslint src test",
+    "clean": "rm -rf build"
+  },
+  "devDependencies": {
+    "@types/node": "^18.7.2",
+    "@types/yargs": "^17.0.11",
+    "typescript": "^4.7.4"
+  },
+  "dependencies": {
+    "@types/chai": "^4.3.3",
+    "@types/mocha": "^9.1.1",
+    "@typescript-eslint/eslint-plugin": "^5.33.0",
+    "@typescript-eslint/parser": "^5.33.0",
+    "chai": "^4.3.6",
+    "eslint": "^8.21.0",
+    "mocha": "^10.0.0",
+    "ts-mocha": "^10.0.0"
+  }
+}
