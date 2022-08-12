@@ -10,7 +10,7 @@
     "build": "npx tsc",
     "test": "npx ts-mocha test/*",
     "lint": "npx eslint src test",
-    "all": "npx eslint src test --fix && npx ts-mocha test/* && npx tsc",
+    "all": "yarn run lint --fix && yarn run test && yarn run build",
     "clean": "rm -rf build"
   },
   "devDependencies": {
