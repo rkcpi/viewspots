@@ -105,27 +105,6 @@ export class Mesh {
     return elementToViewSpotStatus
   }
 
-  private killMultiples(allViewSpots: MeshValue[], neighborhoods: Map<number, Set<MeshElement>>): MeshValue[] {
-    if (allViewSpots.length === new Set<number>(allViewSpots.map(v => v.value)).size) {
-      console.log('everything unique')
-      return allViewSpots
-    } else {
-      console.log('not so very unique')
-      const copy = Array.from(allViewSpots)
-      for (let index = 0; index < allViewSpots.length -1; index++) {
-        const element = allViewSpots[index];
-        const nextElement = allViewSpots[index + 1]
-        if (element.value === nextElement.value) {
-          const neighbours = neighborhoods.get(element.element_id)
-          if (neighbours !== undefined && Array.from(neighbours).find(n => n.id == nextElement.element_id)) {
-            copy.splice(copy.indexOf(nextElement), 1)
-          }
-        }
-      }
-      return copy
-    }
-  }
-
   computeBestNViewSpots(n: number) {
     const neighborhoods = this.elementNeighbourhoods()
     const elementsAreViewSpots = this.checkIfElementIsViewSpotInItsNeighbourHood(neighborhoods)
