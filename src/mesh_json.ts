@@ -1,11 +1,13 @@
 import { Mesh, MeshNode, MeshElement, MeshValue } from './mesh'
 
 export const jsonToMesh = (json: string): Mesh => {
+  const sanityCheck = process.env['SANITY_CHECK'] === 'true'
   const parsedJson = JSON.parse(json)
   return new Mesh(
     toMeshNodes(parsedJson.nodes),
     toMeshElements(parsedJson.elements),
-    toMeshValues(parsedJson.values)
+    toMeshValues(parsedJson.values),
+    sanityCheck
   )
 }
 
