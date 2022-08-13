@@ -1,4 +1,4 @@
-import { Mesh, MeshNode, MeshElement, MeshValue } from './mesh'
+import { Mesh, MeshNode, MeshElement, MeshValue } from './potato'
 
 export const jsonToMesh = (json: string): Mesh => {
   const sanityCheck = process.env['SANITY_CHECK'] === 'true'
