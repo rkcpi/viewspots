@@ -3,6 +3,15 @@ import { jsonToMesh } from '../src/mesh_json'
 import { Mesh } from '../src/mesh'
 
 describe('Mesh', () => {
+
+  before(() => {
+    process.env['SANITY_CHECK'] = 'true'
+  })
+
+  after(() => {
+    process.env['SANITY_CHECK'] = undefined
+  })
+
   it('can be constructed from json', () => {
     const json = `
       {
