@@ -44,7 +44,7 @@ describe('Mesh', () => {
       expectNodeHasElements(nodesWithElements, 5, [3])
     })
 
-    it("finds elements' neighbourhoods", () => {
+    it('finds elements\' neighbourhoods', () => {
       const neighbourhoods: Map<number, ValueMeshElement[]> =
         mesh.findNeighbourhoods(mesh.findNodesWithTheirAdjacentElements())
 
@@ -140,12 +140,12 @@ describe('Mesh', () => {
   })
 
   const expectNodeHasElements = (
-    nodesWithElements: Map<number, ValueMeshElement[]>,
+    nodesWithElements: Map<number, Set<ValueMeshElement>>,
     nodeId: number,
     expectedElements: number[]
   ) => {
     expect(
-      (nodesWithElements.get(nodeId) || assert.fail()).map((e) => e.id)
+      (Array.from(nodesWithElements.get(nodeId) || assert.fail())).map((e) => e.id)
     ).to.include.members(expectedElements)
   }
 

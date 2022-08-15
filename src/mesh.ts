@@ -61,32 +61,36 @@ export class Mesh {
 
     this.nodes = nodes
     this.elements = elements.map(
-      // @ts-ignore
+      // @ts-ignore we're sure that e is a key in elementToValue
       (e) => new ValueMeshElement(e.id, e.nodes, elementToValue.get(e.id))
     )
     this.elementIdsToElements = new Map(this.elements.map((e) => [e.id, e]))
   }
 
-  findNodesWithTheirAdjacentElements(): Map<number, ValueMeshElement[]> {
-    return new Map(
-      this.nodes.map((n) => {
-        const els = this.elements.filter((e) => e.nodes.includes(n.id))
-        // Date.now()
-        return [n.id, els]
+  findNodesWithTheirAdjacentElements(): Map<number, Set<ValueMeshElement>> {
+    const result = new Map<number, Set<ValueMeshElement>>()
+    this.elements.forEach(e => {
+      e.nodes.forEach(n => {
+        if (!result.has(n)) {
+          result.set(n, new Set())
+        }
+        // @ts-ignore we've just made sure that n exists as a key
+        result.get(n).add(e)
       })
-    )
+    })
+    return result
   }
 
   findNeighbourhoods(
-    nodesWithTheirAdjacentElements: Map<number, ValueMeshElement[]>
+    nodesWithTheirAdjacentElements: Map<number, Set<ValueMeshElement>>
   ): Map<number, ValueMeshElement[]> {
-    // @ts-ignore
     return new Map(
       this.elements.map((currentElement) => {
         return [
           currentElement.id,
           currentElement.nodes
-            .flatMap((n) => nodesWithTheirAdjacentElements.get(n))
+            // @ts-ignore
+            .flatMap((n) => Array.from(nodesWithTheirAdjacentElements.get(n)))
             .filter((e) => e !== undefined && e !== currentElement),
         ]
       })
@@ -106,7 +110,7 @@ export class Mesh {
       )
       const currentElementValue =
         this.elementIdsToElements.get(currentElementId)?.value
-      // @ts-ignore
+      // @ts-ignore currentElementValue is never undefined
       result.set(currentElementId, currentElementValue >= maxNeighbour.value)
     }
     return result
