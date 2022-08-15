@@ -7,7 +7,7 @@ interface MeshElement {
   nodes: number[]
 }
 
-class ValueMeshElement {
+export class ValueMeshElement {
   id: number
   nodes: number[]
   value: number
@@ -69,30 +69,31 @@ export class Mesh {
 
   findNodesWithTheirAdjacentElements(): Map<number, ValueMeshElement[]> {
     return new Map(
-      this.nodes.map(n => {
-        const els = this.elements.filter(e => e.nodes.includes(n.id))
+      this.nodes.map((n) => {
+        const els = this.elements.filter((e) => e.nodes.includes(n.id))
         // Date.now()
-        return [
-          n.id,
-          els,
-        ]
+        return [n.id, els]
       })
     )
   }
 
-  findNeighbourhoods(nodesWithTheirAdjacentElements: Map<number, ValueMeshElement[]>): [number, ValueMeshElement[]][] {
+  findNeighbourhoods(
+    nodesWithTheirAdjacentElements: Map<number, ValueMeshElement[]>
+  ): [number, ValueMeshElement[]][] {
     // @ts-ignore
-    return this.elements.map(currentElement => {
+    return this.elements.map((currentElement) => {
       return [
         currentElement.id,
         currentElement.nodes
-          .flatMap(n => nodesWithTheirAdjacentElements.get(n))
-          .filter(e => e !== undefined && e !== currentElement),
+          .flatMap((n) => nodesWithTheirAdjacentElements.get(n))
+          .filter((e) => e !== undefined && e !== currentElement),
       ]
     })
   }
 
-  checkIfElementsAreViewSpots(elementsWithTheirNeighbourhoods: [number, ValueMeshElement[]][]) {
+  checkIfElementsAreViewSpots(
+    elementsWithTheirNeighbourhoods: [number, ValueMeshElement[]][]
+  ) {
     return new Map(
       elementsWithTheirNeighbourhoods.map((elementWithNeighbours) => {
         const currentElementId = elementWithNeighbours[0]
@@ -107,16 +108,22 @@ export class Mesh {
     )
   }
 
-  filterAndSortViewSpots(elementsAreViewSpots: Map<number,  boolean>) {
+  filterAndSortViewSpots(elementsAreViewSpots: Map<number, boolean>) {
     return this.elements
-    .filter(e => elementsAreViewSpots.get(e.id))
-    .sort((a, b) => b.value - a.value)
+      .filter((e) => elementsAreViewSpots.get(e.id))
+      .sort((a, b) => b.value - a.value)
   }
 
-  computeBestNViewSpots(n: number) {
-    const nodesWithTheirAdjacentElements = this.findNodesWithTheirAdjacentElements()
-    const elementsWithTheirNeighbourhoods = this.findNeighbourhoods(nodesWithTheirAdjacentElements)
-    const elementsAreViewSpots = this.checkIfElementsAreViewSpots(elementsWithTheirNeighbourhoods)
+  computeBestNViewSpots(n = NaN) {
+    if (n === 0) return []
+    const nodesWithTheirAdjacentElements =
+      this.findNodesWithTheirAdjacentElements()
+    const elementsWithTheirNeighbourhoods = this.findNeighbourhoods(
+      nodesWithTheirAdjacentElements
+    )
+    const elementsAreViewSpots = this.checkIfElementsAreViewSpots(
+      elementsWithTheirNeighbourhoods
+    )
     const allViewSpots = this.filterAndSortViewSpots(elementsAreViewSpots)
     return isNaN(n) ? allViewSpots : allViewSpots.slice(0, n)
   }

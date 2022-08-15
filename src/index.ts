@@ -9,6 +9,12 @@ const mesh = jsonToMesh(json)
 
 const viewSpots = mesh.computeBestNViewSpots(numberOfDesiredViewSpots)
 
-console.log(JSON.stringify(viewSpots.map(e => {
-  return { element_id: e.id, value: e.value }
-}), null, 2))
+console.log(
+  JSON.stringify(
+    viewSpots.map((e) => {
+      return { element_id: e.id, value: e.value }
+    }),
+    null,
+    2
+  )
+)
