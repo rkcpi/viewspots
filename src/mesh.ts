@@ -79,39 +79,72 @@ export class Mesh {
 
   findNeighbourhoods(
     nodesWithTheirAdjacentElements: Map<number, ValueMeshElement[]>
-  ): [number, ValueMeshElement[]][] {
+  ): Map<number, ValueMeshElement[]> {
     // @ts-ignore
-    return this.elements.map((currentElement) => {
-      return [
-        currentElement.id,
-        currentElement.nodes
-          .flatMap((n) => nodesWithTheirAdjacentElements.get(n))
-          .filter((e) => e !== undefined && e !== currentElement),
-      ]
-    })
+    return new Map(
+      this.elements.map((currentElement) => {
+        return [
+          currentElement.id,
+          currentElement.nodes
+            .flatMap((n) => nodesWithTheirAdjacentElements.get(n))
+            .filter((e) => e !== undefined && e !== currentElement),
+        ]
+      })
+    )
   }
 
   checkIfElementsAreViewSpots(
-    elementsWithTheirNeighbourhoods: [number, ValueMeshElement[]][]
+    elementsWithTheirNeighbourhoods: Map<number, ValueMeshElement[]>
   ) {
-    return new Map(
-      elementsWithTheirNeighbourhoods.map((elementWithNeighbours) => {
-        const currentElementId = elementWithNeighbours[0]
-        const maxNeighbour = elementWithNeighbours[1].reduce((prev, current) =>
-          prev.value > current.value ? prev : current
-        )
-        const currentElementValue =
-          this.elementIdsToElements.get(currentElementId)?.value
-        // @ts-ignore
-        return [currentElementId, currentElementValue >= maxNeighbour.value]
-      })
-    )
+    const result = new Map<number, boolean>()
+    for (const [
+      currentElementId,
+      neighbours,
+    ] of elementsWithTheirNeighbourhoods.entries()) {
+      const maxNeighbour = neighbours.reduce((prev, current) =>
+        prev.value > current.value ? prev : current
+      )
+      const currentElementValue =
+        this.elementIdsToElements.get(currentElementId)?.value
+      // @ts-ignore
+      result.set(currentElementId, currentElementValue >= maxNeighbour.value)
+    }
+    return result
   }
 
   filterAndSortViewSpots(elementsAreViewSpots: Map<number, boolean>) {
     return this.elements
       .filter((e) => elementsAreViewSpots.get(e.id))
       .sort((a, b) => b.value - a.value)
+  }
+
+  removePossibleDuplicatesIfTheyAreNeighbours(
+    allViewSpots: ValueMeshElement[],
+    neighbourhoods: Map<number, ValueMeshElement[]>
+  ) {
+    if (
+      new Set(allViewSpots.map((v) => v.value)).size === allViewSpots.length
+    ) {
+      return allViewSpots
+    }
+    const knownValuesWithElements = new Map<number, number[]>()
+    return allViewSpots.filter((v) => {
+      let duplicate
+      if (knownValuesWithElements.has(v.value)) {
+        knownValuesWithElements.get(v.value)?.forEach((elementId) => {
+          duplicate = neighbourhoods
+            .get(elementId)
+            ?.find((neighbour) => neighbour.id === v.id)
+        })
+        if (!duplicate) {
+          knownValuesWithElements.get(v.value)?.push(v.id)
+        }
+        return false
+      } else {
+        knownValuesWithElements.set(v.value, [v.id])
+        return true
+      }
+    })
   }
 
   computeBestNViewSpots(n = NaN) {
@@ -125,6 +158,13 @@ export class Mesh {
       elementsWithTheirNeighbourhoods
     )
     const allViewSpots = this.filterAndSortViewSpots(elementsAreViewSpots)
-    return isNaN(n) ? allViewSpots : allViewSpots.slice(0, n)
+    const viewSpotsWithoutDuplicates =
+      this.removePossibleDuplicatesIfTheyAreNeighbours(
+        allViewSpots,
+        elementsWithTheirNeighbourhoods
+      )
+    return isNaN(n)
+      ? viewSpotsWithoutDuplicates
+      : viewSpotsWithoutDuplicates.slice(0, n)
   }
 }
