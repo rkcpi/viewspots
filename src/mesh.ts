@@ -9,12 +9,12 @@ interface MeshElement {
 
 export class ValueMeshElement {
   id: number
-  nodes: number[]
+  nodeIds: number[]
   value: number
 
   constructor(id: number, nodes: number[], value: number) {
     this.id = id
-    this.nodes = nodes
+    this.nodeIds = nodes
     this.value = value
   }
 }
@@ -37,9 +37,10 @@ export class Mesh {
   ) {
     if (sanityCheck) {
       // Check validity of node references in elements
+      const allNodes = new Set(nodes.map(n => n.id))
       elements.forEach((element) => {
         element.nodes.forEach((elementNode) => {
-          if (!nodes.some((node) => node.id === elementNode)) {
+          if (!allNodes.has(elementNode)) {
             throw new Error(
               `Element ${element.id} refers to unknown node with id ${elementNode}`
             )
@@ -61,8 +62,8 @@ export class Mesh {
 
     this.nodes = nodes
     this.elements = elements.map(
-      // @ts-ignore we're sure that e is a key in elementToValue
-      (e) => new ValueMeshElement(e.id, e.nodes, elementToValue.get(e.id))
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      (e) => new ValueMeshElement(e.id, e.nodes, elementToValue.get(e.id)!)
     )
     this.elementIdsToElements = new Map(this.elements.map((e) => [e.id, e]))
   }
@@ -70,12 +71,12 @@ export class Mesh {
   findNodesWithTheirAdjacentElements(): Map<number, Set<ValueMeshElement>> {
     const result = new Map<number, Set<ValueMeshElement>>()
     this.elements.forEach(e => {
-      e.nodes.forEach(n => {
+      e.nodeIds.forEach(n => {
         if (!result.has(n)) {
           result.set(n, new Set())
         }
-        // @ts-ignore we've just made sure that n exists as a key
-        result.get(n).add(e)
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        result.get(n)!.add(e)
       })
     })
     return result
@@ -88,9 +89,9 @@ export class Mesh {
       this.elements.map((currentElement) => {
         return [
           currentElement.id,
-          currentElement.nodes
-          // @ts-ignore n is a key in the map
-            .flatMap((n) => Array.from(nodesWithTheirAdjacentElements.get(n)))
+          currentElement.nodeIds
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            .flatMap((n) => Array.from(nodesWithTheirAdjacentElements.get(n)!))
             .filter((e) => e !== undefined && e !== currentElement),
         ]
       })
@@ -110,8 +111,8 @@ export class Mesh {
       )
       const currentElementValue =
         this.elementIdsToElements.get(currentElementId)?.value
-      // @ts-ignore currentElementValue is never undefined
-      result.set(currentElementId, currentElementValue >= maxNeighbour.value)
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      result.set(currentElementId, currentElementValue! >= maxNeighbour.value)
     }
     return result
   }

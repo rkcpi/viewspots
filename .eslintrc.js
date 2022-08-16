@@ -13,6 +13,5 @@ module.exports = {
     "comma-spacing": ["error", { "before": false, "after": true }],
     "object-curly-spacing": ["error", "always"],
     "quotes": ["error", "single"],
-    "@typescript-eslint/ban-ts-comment": "off",
   }
 };
