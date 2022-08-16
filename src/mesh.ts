@@ -89,7 +89,7 @@ export class Mesh {
         return [
           currentElement.id,
           currentElement.nodes
-            // @ts-ignore
+          // @ts-ignore n is a key in the map
             .flatMap((n) => Array.from(nodesWithTheirAdjacentElements.get(n)))
             .filter((e) => e !== undefined && e !== currentElement),
         ]
