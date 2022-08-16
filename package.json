@@ -7,25 +7,23 @@
   "author": "Sandra Thieme <thieme.sandra@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "build": "npx tsc",
-    "test": "npx ts-mocha test/*",
-    "lint": "npx eslint src test",
+    "build": "tsc",
+    "test": "ts-mocha test/*",
+    "lint": "eslint src test",
     "all": "yarn run lint --fix && yarn run test && yarn run build",
     "clean": "rm -rf build"
   },
   "devDependencies": {
-    "@types/node": "^18.7.2",
-    "@types/yargs": "^17.0.11",
-    "typescript": "^4.7.4"
-  },
-  "dependencies": {
     "@types/chai": "^4.3.3",
     "@types/mocha": "^9.1.1",
+    "@types/node": "^18.7.2",
     "@typescript-eslint/eslint-plugin": "^5.33.0",
     "@typescript-eslint/parser": "^5.33.0",
+    "typescript": "^4.7.4",
     "chai": "^4.3.6",
     "eslint": "^8.21.0",
     "mocha": "^10.0.0",
     "ts-mocha": "^10.0.0"
-  }
+  },
+  "dependencies": {}
 }
