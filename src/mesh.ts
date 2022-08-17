@@ -36,26 +36,7 @@ export class Mesh {
     sanityCheck = false
   ) {
     if (sanityCheck) {
-      // Check validity of node references in elements
-      const allNodes = new Set(nodes.map(n => n.id))
-      elements.forEach((element) => {
-        element.nodes.forEach((elementNode) => {
-          if (!allNodes.has(elementNode)) {
-            throw new Error(
-              `Element ${element.id} refers to unknown node with id ${elementNode}`
-            )
-          }
-        })
-      })
-
-      // Check validity of element references in values
-      values.forEach((value) => {
-        if (!elements.some((element) => element.id === value.element_id)) {
-          throw new Error(
-            `Value refers to unknown element with id ${value.element_id}`
-          )
-        }
-      })
+      this.checkSanity(nodes, elements, values)
     }
 
     const elementToValue = new Map(values.map((v) => [v.element_id, v.value]))
@@ -66,6 +47,29 @@ export class Mesh {
       (e) => new ValueMeshElement(e.id, e.nodes, elementToValue.get(e.id)!)
     )
     this.elementIdsToElements = new Map(this.elements.map((e) => [e.id, e]))
+  }
+
+  private checkSanity(nodes: MeshNode[], elements: MeshElement[], values: MeshValue[]) {
+    // Check validity of node references in elements
+    const allNodes = new Set(nodes.map(n => n.id))
+    elements.forEach((element) => {
+      element.nodes.forEach((elementNode) => {
+        if (!allNodes.has(elementNode)) {
+          throw new Error(
+            `Element ${element.id} refers to unknown node with id ${elementNode}`
+          )
+        }
+      })
+    })
+
+    // Check validity of element references in values
+    values.forEach((value) => {
+      if (!elements.some((element) => element.id === value.element_id)) {
+        throw new Error(
+          `Value refers to unknown element with id ${value.element_id}`
+        )
+      }
+    })
   }
 
   findNodesWithTheirAdjacentElements(): Map<number, Set<ValueMeshElement>> {
