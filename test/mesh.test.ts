@@ -1,5 +1,5 @@
-import { assert, expect } from 'chai'
-import { ValueMeshElement, Mesh } from '../src/mesh'
+import { expect } from 'chai'
+import { Mesh } from '../src/mesh'
 import { jsonToMesh } from '../src/mesh_json'
 
 describe('Mesh', () => {
@@ -31,53 +31,6 @@ describe('Mesh', () => {
           ]
         }
       `)
-    })
-
-    it('finds all elements connected to a node', () => {
-      const nodesWithElements = mesh.findNodesWithTheirAdjacentElements()
-
-      expectNodeHasElements(nodesWithElements, 0, [0, 1])
-      expectNodeHasElements(nodesWithElements, 1, [0])
-      expectNodeHasElements(nodesWithElements, 2, [1, 2])
-      expectNodeHasElements(nodesWithElements, 3, [0, 1, 2])
-      expectNodeHasElements(nodesWithElements, 4, [2])
-      expectNodeHasElements(nodesWithElements, 5, [3])
-    })
-
-    it('finds elements\' neighbourhoods', () => {
-      const neighbourhoods: Map<number, ValueMeshElement[]> =
-        mesh.findNeighbourhoods(mesh.findNodesWithTheirAdjacentElements())
-
-      expectElementHasNeighbours(0, neighbourhoods, [1, 2])
-      expectElementHasNeighbours(1, neighbourhoods, [0, 2, 3])
-      expectElementHasNeighbours(2, neighbourhoods, [1, 0, 3])
-      expectElementHasNeighbours(3, neighbourhoods, [1, 2])
-    })
-
-    it('identifies view spots', () => {
-      const neighbourhoods: Map<number, ValueMeshElement[]> =
-        mesh.findNeighbourhoods(mesh.findNodesWithTheirAdjacentElements())
-
-      const elementsAreViewSpots =
-        mesh.checkIfElementsAreViewSpots(neighbourhoods)
-
-      expect(elementsAreViewSpots.get(0)).to.be.true
-      expect(elementsAreViewSpots.get(1)).to.be.false
-      expect(elementsAreViewSpots.get(2)).to.be.false
-      expect(elementsAreViewSpots.get(3)).to.be.true
-    })
-
-    it('filters and sorts view spots', () => {
-      const neighbourhoods: Map<number, ValueMeshElement[]> =
-        mesh.findNeighbourhoods(mesh.findNodesWithTheirAdjacentElements())
-      const elementsAreViewSpots =
-        mesh.checkIfElementsAreViewSpots(neighbourhoods)
-
-      const viewSpots = mesh.filterAndSortViewSpots(elementsAreViewSpots)
-
-      expect(viewSpots).to.have.length(2)
-      expect(viewSpots[0].id).to.be.equal(3)
-      expect(viewSpots[1].id).to.be.equal(0)
     })
 
     it('finds all view spots', () => {
@@ -175,23 +128,4 @@ describe('Mesh', () => {
       expect(viewSpots.map(v => v.id)).to.contain.members([0, 3])
     })
   })
-
-  const expectNodeHasElements = (
-    nodesWithElements: Map<number, Set<ValueMeshElement>>,
-    nodeId: number,
-    expectedElements: number[]
-  ) => {
-    expect(
-      (Array.from(nodesWithElements.get(nodeId) || assert.fail())).map((e) => e.id)
-    ).to.include.members(expectedElements)
-  }
-
-  const expectElementHasNeighbours = (
-    elementId: number,
-    neighbourhoods: Map<number, ValueMeshElement[]>,
-    expectedNeighbours: number[]
-  ) => {
-    const neighbours = neighbourhoods.get(elementId) || assert.fail()
-    expect(neighbours.map((e) => e.id)).to.include.members(expectedNeighbours)
-  }
 })

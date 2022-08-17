@@ -7,7 +7,7 @@ interface MeshElement {
   nodes: number[]
 }
 
-export class ValueMeshElement {
+class ValueMeshElement {
   id: number
   nodeIds: number[]
   value: number
@@ -72,7 +72,7 @@ export class Mesh {
     })
   }
 
-  findNodesWithTheirAdjacentElements(): Map<number, Set<ValueMeshElement>> {
+  private findNodesWithTheirAdjacentElements(): Map<number, Set<ValueMeshElement>> {
     const result = new Map<number, Set<ValueMeshElement>>()
     this.elements.forEach(element => {
       element.nodeIds.forEach(nodeId => {
@@ -87,7 +87,7 @@ export class Mesh {
     return result
   }
 
-  findNeighbourhoods(
+  private findNeighbourhoods(
     nodesWithTheirAdjacentElements: Map<number, Set<ValueMeshElement>>
   ): Map<number, ValueMeshElement[]> {
     return new Map(
@@ -102,7 +102,7 @@ export class Mesh {
     )
   }
 
-  checkIfElementsAreViewSpots(
+  private checkIfElementsAreViewSpots(
     elementsWithTheirNeighbourhoods: Map<number, ValueMeshElement[]>
   ) {
     const result = new Map<number, boolean>()
@@ -121,13 +121,13 @@ export class Mesh {
     return result
   }
 
-  filterAndSortViewSpots(elementsAreViewSpots: Map<number, boolean>) {
+  private filterAndSortViewSpots(elementsAreViewSpots: Map<number, boolean>) {
     return this.elements
       .filter((element) => elementsAreViewSpots.get(element.id))
       .sort((a, b) => b.value - a.value)
   }
 
-  removePossibleDuplicatesIfTheyAreNeighbours(
+  private removePossibleDuplicatesIfTheyAreNeighbours(
     allViewSpots: ValueMeshElement[],
     neighbourhoods: Map<number, ValueMeshElement[]>
   ) {
@@ -144,6 +144,7 @@ export class Mesh {
     const filteredViewSpots = allViewSpots.reduce<ViewSpotFilter>((acc, currentViewSpot) => {
       if (acc.knownValuesWithElements.has(currentViewSpot.value)) {
         const viewSpotsWithSameValue = acc.knownValuesWithElements.get(currentViewSpot.value)
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         const thereIsANeighbourWithSameValue = viewSpotsWithSameValue!.some((elementId) => {
           const neighboursForThisElement = neighbourhoods.get(elementId)
           const currentViewSpotIsNeighbourOfElementWithSameValue =
@@ -160,7 +161,7 @@ export class Mesh {
       }
       return acc
 
-    }, {knownValuesWithElements: new Map(), actualViewSpots: []} as ViewSpotFilter)
+    }, { knownValuesWithElements: new Map(), actualViewSpots: [] } as ViewSpotFilter)
     return filteredViewSpots.actualViewSpots
   }
 
