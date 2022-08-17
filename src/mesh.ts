@@ -44,14 +44,14 @@ export class Mesh {
     this.nodes = nodes
     this.elements = elements.map(
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      (e) => new ValueMeshElement(e.id, e.nodes, elementToValue.get(e.id)!)
+      (element) => new ValueMeshElement(element.id, element.nodes, elementToValue.get(element.id)!)
     )
-    this.elementIdsToElements = new Map(this.elements.map((e) => [e.id, e]))
+    this.elementIdsToElements = new Map(this.elements.map((element) => [element.id, element]))
   }
 
   private checkSanity(nodes: MeshNode[], elements: MeshElement[], values: MeshValue[]) {
     // Check validity of node references in elements
-    const allNodes = new Set(nodes.map(n => n.id))
+    const allNodes = new Set(nodes.map(node => node.id))
     elements.forEach((element) => {
       element.nodes.forEach((elementNode) => {
         if (!allNodes.has(elementNode)) {
@@ -74,13 +74,14 @@ export class Mesh {
 
   findNodesWithTheirAdjacentElements(): Map<number, Set<ValueMeshElement>> {
     const result = new Map<number, Set<ValueMeshElement>>()
-    this.elements.forEach(e => {
-      e.nodeIds.forEach(n => {
-        if (!result.has(n)) {
-          result.set(n, new Set())
+    this.elements.forEach(element => {
+      element.nodeIds.forEach(nodeId => {
+        if (result.has(nodeId)) {
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          result.get(nodeId)!.add(element)
+        } else {
+          result.set(nodeId, new Set([element]))
         }
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        result.get(n)!.add(e)
       })
     })
     return result
@@ -91,13 +92,12 @@ export class Mesh {
   ): Map<number, ValueMeshElement[]> {
     return new Map(
       this.elements.map((currentElement) => {
-        return [
-          currentElement.id,
-          currentElement.nodeIds
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            .flatMap((n) => Array.from(nodesWithTheirAdjacentElements.get(n)!))
-            .filter((e) => e !== undefined && e !== currentElement),
-        ]
+        const neighbours =  currentElement.nodeIds
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        .flatMap((nodeId) => Array.from(nodesWithTheirAdjacentElements.get(nodeId)!))
+        .filter((element) => element !== undefined && element.id !== currentElement.id)
+
+        return [currentElement.id, neighbours]
       })
     )
   }
@@ -123,7 +123,7 @@ export class Mesh {
 
   filterAndSortViewSpots(elementsAreViewSpots: Map<number, boolean>) {
     return this.elements
-      .filter((e) => elementsAreViewSpots.get(e.id))
+      .filter((element) => elementsAreViewSpots.get(element.id))
       .sort((a, b) => b.value - a.value)
   }
 
@@ -132,25 +132,25 @@ export class Mesh {
     neighbourhoods: Map<number, ValueMeshElement[]>
   ) {
     if (
-      new Set(allViewSpots.map((v) => v.value)).size === allViewSpots.length
+      new Set(allViewSpots.map((viewSpot) => viewSpot.value)).size === allViewSpots.length
     ) {
       return allViewSpots
     }
     const knownValuesWithElements = new Map<number, number[]>()
-    return allViewSpots.filter((v) => {
+    return allViewSpots.filter((viewSpot) => {
       let duplicate
-      if (knownValuesWithElements.has(v.value)) {
-        knownValuesWithElements.get(v.value)?.forEach((elementId) => {
+      if (knownValuesWithElements.has(viewSpot.value)) {
+        knownValuesWithElements.get(viewSpot.value)?.forEach((elementId) => {
           duplicate = neighbourhoods
             .get(elementId)
-            ?.find((neighbour) => neighbour.id === v.id)
+            ?.find((neighbour) => neighbour.id === viewSpot.id)
         })
         if (!duplicate) {
-          knownValuesWithElements.get(v.value)?.push(v.id)
+          knownValuesWithElements.get(viewSpot.value)?.push(viewSpot.id)
         }
         return false
       } else {
-        knownValuesWithElements.set(v.value, [v.id])
+        knownValuesWithElements.set(viewSpot.value, [viewSpot.id])
         return true
       }
     })

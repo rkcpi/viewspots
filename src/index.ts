@@ -16,8 +16,8 @@ try {
 
   console.log(
     JSON.stringify(
-      viewSpots.map((e) => {
-        return { element_id: e.id, value: e.value }
+      viewSpots.map((viewSpot) => {
+        return { element_id: viewSpot.id, value: viewSpot.value }
       }),
       null,
       2
