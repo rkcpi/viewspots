@@ -136,24 +136,32 @@ export class Mesh {
     ) {
       return allViewSpots
     }
-    const knownValuesWithElements = new Map<number, number[]>()
-    return allViewSpots.filter((viewSpot) => {
-      let duplicate
-      if (knownValuesWithElements.has(viewSpot.value)) {
-        knownValuesWithElements.get(viewSpot.value)?.forEach((elementId) => {
-          duplicate = neighbourhoods
-            .get(elementId)
-            ?.find((neighbour) => neighbour.id === viewSpot.id)
+
+    interface ViewSpotFilter {
+      knownValuesWithElements: Map<number, number[]>
+      actualViewSpots: ValueMeshElement[]
+    }
+    const filteredViewSpots = allViewSpots.reduce<ViewSpotFilter>((acc, currentViewSpot) => {
+      if (acc.knownValuesWithElements.has(currentViewSpot.value)) {
+        const viewSpotsWithSameValue = acc.knownValuesWithElements.get(currentViewSpot.value)
+        const thereIsANeighbourWithSameValue = viewSpotsWithSameValue!.some((elementId) => {
+          const neighboursForThisElement = neighbourhoods.get(elementId)
+          const currentViewSpotIsNeighbourOfElementWithSameValue =
+            neighboursForThisElement?.some((neighbour) => neighbour.id === currentViewSpot.id)
+          return currentViewSpotIsNeighbourOfElementWithSameValue
         })
-        if (!duplicate) {
-          knownValuesWithElements.get(viewSpot.value)?.push(viewSpot.id)
+        if (!thereIsANeighbourWithSameValue) {
+          acc.knownValuesWithElements.get(currentViewSpot.value)?.push(currentViewSpot.id)
+          acc.actualViewSpots.push(currentViewSpot)
         }
-        return false
       } else {
-        knownValuesWithElements.set(viewSpot.value, [viewSpot.id])
-        return true
+        acc.knownValuesWithElements.set(currentViewSpot.value, [currentViewSpot.id])
+        acc.actualViewSpots.push(currentViewSpot)
       }
-    })
+      return acc
+
+    }, {knownValuesWithElements: new Map(), actualViewSpots: []} as ViewSpotFilter)
+    return filteredViewSpots.actualViewSpots
   }
 
   computeBestNViewSpots(n = NaN) {
