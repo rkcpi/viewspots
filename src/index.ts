@@ -1,5 +1,5 @@
 import { readFile } from './files'
-import { jsonToMesh } from './mesh_json'
+import { jsonStringToMesh } from './mesh_json'
 
 const fileName = process.argv[2]
 
@@ -11,14 +11,12 @@ const numberOfDesiredViewSpots = parseInt(process.argv[3])
 
 try {
   const json = readFile(fileName)
-  const mesh = jsonToMesh(json)
+  const mesh = jsonStringToMesh(json)
   const viewSpots = mesh.computeBestNViewSpots(numberOfDesiredViewSpots)
 
   console.log(
     JSON.stringify(
-      viewSpots.map((viewSpot) => {
-        return { element_id: viewSpot.id, value: viewSpot.value }
-      }),
+      viewSpots,
       null,
       2
     )

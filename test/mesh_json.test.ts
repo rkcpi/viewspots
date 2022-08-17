@@ -1,5 +1,5 @@
 import { expect } from 'chai'
-import { jsonToMesh } from '../src/mesh_json'
+import { jsonStringToMesh } from '../src/mesh_json'
 import { Mesh } from '../src/mesh'
 
 describe('Mesh (json)', () => {
@@ -27,13 +27,13 @@ describe('Mesh (json)', () => {
         ]
       }
     `
-    const mesh = jsonToMesh(json)
+    const mesh = jsonStringToMesh(json)
     expect(mesh instanceof Mesh).to.be.true
   })
 
   it('cannot be constructed from invalid json', () => {
-    expect(() => jsonToMesh('{}')).to.throw(Error)
-    expect(() => jsonToMesh('[]')).to.throw(Error)
+    expect(() => jsonStringToMesh('{}')).to.throw(Error)
+    expect(() => jsonStringToMesh('[]')).to.throw(Error)
   })
 
   it('cannot be constructed from invalid json (invalid node reference)', () => {
@@ -52,7 +52,7 @@ describe('Mesh (json)', () => {
         ]
       }
     `
-    expect(() => jsonToMesh(json)).to.throw(Error)
+    expect(() => jsonStringToMesh(json)).to.throw(Error)
   })
 
   it('cannot be constructed from invalid json (invalid element reference)', () => {
@@ -71,6 +71,6 @@ describe('Mesh (json)', () => {
         ]
       }
     `
-    expect(() => jsonToMesh(json)).to.throw(Error)
+    expect(() => jsonStringToMesh(json)).to.throw(Error)
   })
 })

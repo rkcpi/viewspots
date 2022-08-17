@@ -165,6 +165,12 @@ export class Mesh {
     return filteredViewSpots.actualViewSpots
   }
 
+  private format(viewSpots: ValueMeshElement[]) {
+    return viewSpots.map(viewSpot => {
+      return { element_id: viewSpot.id, value: viewSpot.value }
+    })
+  }
+
   computeBestNViewSpots(n = NaN) {
     if (n === 0) return []
     const nodesWithTheirAdjacentElements =
@@ -181,8 +187,8 @@ export class Mesh {
         allViewSpots,
         elementsWithTheirNeighbourhoods
       )
-    return isNaN(n)
+    return this.format(isNaN(n)
       ? viewSpotsWithoutDuplicates
-      : viewSpotsWithoutDuplicates.slice(0, n)
+      : viewSpotsWithoutDuplicates.slice(0, n))
   }
 }

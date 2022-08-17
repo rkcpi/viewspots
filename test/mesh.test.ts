@@ -1,13 +1,13 @@
 import { expect } from 'chai'
 import { Mesh } from '../src/mesh'
-import { jsonToMesh } from '../src/mesh_json'
+import { jsonStringToMesh } from '../src/mesh_json'
 
 describe('Mesh', () => {
   let mesh: Mesh
 
   describe('A regular mesh', () => {
     beforeEach(() => {
-      mesh = jsonToMesh(`
+      mesh = jsonStringToMesh(`
         {
           "nodes": [
             {"id": 0},
@@ -37,29 +37,29 @@ describe('Mesh', () => {
       const viewSpots = mesh.computeBestNViewSpots()
 
       expect(viewSpots).to.have.length(2)
-      expect(viewSpots[0].id).to.be.equal(3)
-      expect(viewSpots[1].id).to.be.equal(0)
+      expect(viewSpots[0].element_id).to.be.equal(3)
+      expect(viewSpots[1].element_id).to.be.equal(0)
     })
 
     it('finds best n view spots for n <= number of total viewspots', () => {
       const viewSpots = mesh.computeBestNViewSpots(1)
 
       expect(viewSpots).to.have.length(1)
-      expect(viewSpots[0].id).to.be.equal(3)
+      expect(viewSpots[0].element_id).to.be.equal(3)
     })
 
     it('finds all view spots if n > number of total viewspots', () => {
       const viewSpots = mesh.computeBestNViewSpots(3)
 
       expect(viewSpots).to.have.length(2)
-      expect(viewSpots[0].id).to.be.equal(3)
-      expect(viewSpots[1].id).to.be.equal(0)
+      expect(viewSpots[0].element_id).to.be.equal(3)
+      expect(viewSpots[1].element_id).to.be.equal(0)
     })
   })
 
   describe('A plane mesh', () => {
     beforeEach(() => {
-      mesh = jsonToMesh(`
+      mesh = jsonStringToMesh(`
         {
           "nodes":[
             {"id": 0},
@@ -89,13 +89,13 @@ describe('Mesh', () => {
       const viewSpots = mesh.computeBestNViewSpots()
 
       expect(viewSpots).to.have.length(2)
-      expect(viewSpots.map(v => v.id)).to.contain.members([0, 3])
+      expect(viewSpots.map(v => v.element_id)).to.contain.members([0, 3])
     })
   })
 
   describe('A mesh with viewspots with same value', () => {
     beforeEach(() => {
-      mesh = jsonToMesh(`
+      mesh = jsonStringToMesh(`
         {
           "nodes":[
             {"id": 0},
@@ -125,7 +125,7 @@ describe('Mesh', () => {
       const viewSpots = mesh.computeBestNViewSpots()
 
       expect(viewSpots).to.have.length(2)
-      expect(viewSpots.map(v => v.id)).to.contain.members([0, 3])
+      expect(viewSpots.map(v => v.element_id)).to.contain.members([0, 3])
     })
   })
 })

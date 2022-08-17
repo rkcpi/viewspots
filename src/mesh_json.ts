@@ -1,6 +1,6 @@
 import { Mesh } from './mesh'
 
-export const jsonToMesh = (json: string): Mesh => {
+export const jsonStringToMesh = (json: string): Mesh => {
   const sanityCheck = process.env['SANITY_CHECK'] === 'true'
   const parsedJson = JSON.parse(json)
   if (
@@ -15,5 +15,13 @@ export const jsonToMesh = (json: string): Mesh => {
     parsedJson.elements,
     parsedJson.values,
     sanityCheck
+  )
+}
+
+export const jsonObjectToMesh = (json: any): Mesh => {
+  return new Mesh(
+    json.nodes,
+    json.elements,
+    json.values,
   )
 }
