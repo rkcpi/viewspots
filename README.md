@@ -9,12 +9,26 @@ as an element that has a greater value than all its neighbours. A neighbour is a
 yarn build
 ```
 
-## Usage
+## CLI Usage
 
 Execute the app with a path to a json file that describes the mesh and the number of desired view spots. If the number paramter is not given, not a number, or higher than the maximum number of view spots, all view spots will be returned.
 
 ```bash
 node build/src/index.js <path-to-mesh-json> [<number-of-view-spots>]
+```
+
+## Serverless Usage
+
+For local testing start serverless in offline mode:
+
+```bash
+serverless offline
+```
+
+After this has started successfully, you can use curl or any other http client to trigger the λ:
+
+```bash
+curl --data "@<path-to-mesh-json>" http://localhost:3000[?n=<number-of-view-spots>]
 ```
 
 ## Input

@@ -7,8 +7,8 @@ provider:
   runtime: nodejs14.x
 
 functions:
-  hello:
-    handler: handler.hello
+  viewspots:
+    handler: handler.viewspots
     events:
     - httpApi:
         path: /

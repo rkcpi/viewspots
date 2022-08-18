@@ -24,6 +24,16 @@ interface MeshValue {
   value: number
 }
 
+interface ElementMapping {
+  elements: ValueMeshElement[]
+  mapping: Map<number, ValueMeshElement>
+}
+
+interface ViewSpotFilter {
+  knownValuesWithElements: Map<number, number[]>
+  actualViewSpots: ValueMeshElement[]
+}
+
 export class Mesh {
   nodes: MeshNode[]
   elements: ValueMeshElement[]
@@ -39,14 +49,11 @@ export class Mesh {
       this.checkSanity(nodes, elements, values)
     }
 
-    const elementToValue = new Map(values.map((v) => [v.element_id, v.value]))
-
     this.nodes = nodes
-    this.elements = elements.map(
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      (element) => new ValueMeshElement(element.id, element.nodes, elementToValue.get(element.id)!)
-    )
-    this.elementIdsToElements = new Map(this.elements.map((element) => [element.id, element]))
+
+    const elementMapping = this.elementsToValueMeshElements(elements, values)
+    this.elements = elementMapping.elements
+    this.elementIdsToElements = elementMapping.mapping
   }
 
   private checkSanity(nodes: MeshNode[], elements: MeshElement[], values: MeshValue[]) {
@@ -70,6 +77,17 @@ export class Mesh {
         )
       }
     })
+  }
+
+  private elementsToValueMeshElements(elements: MeshElement[], values: MeshValue[]): ElementMapping {
+    const elementToValue = new Map(values.map((v) => [v.element_id, v.value]))
+    return elements.reduce<ElementMapping>((acc: ElementMapping, element: MeshElement) => {
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      const valueMeshElement = new ValueMeshElement(element.id, element.nodes, elementToValue.get(element.id)!)
+      acc.elements.push(valueMeshElement)
+      acc.mapping.set(valueMeshElement.id, valueMeshElement)
+      return acc
+    }, { elements: [], mapping: new Map() } as ElementMapping)
   }
 
   private findNodesWithTheirAdjacentElements(): Map<number, Set<ValueMeshElement>> {
@@ -137,10 +155,6 @@ export class Mesh {
       return allViewSpots
     }
 
-    interface ViewSpotFilter {
-      knownValuesWithElements: Map<number, number[]>
-      actualViewSpots: ValueMeshElement[]
-    }
     const filteredViewSpots = allViewSpots.reduce<ViewSpotFilter>((acc, currentViewSpot) => {
       if (acc.knownValuesWithElements.has(currentViewSpot.value)) {
         const viewSpotsWithSameValue = acc.knownValuesWithElements.get(currentViewSpot.value)
@@ -172,7 +186,7 @@ export class Mesh {
   }
 
   computeBestNViewSpots(n = NaN) {
-    if (n === 0) return []
+    if (n <= 0) return []
     const nodesWithTheirAdjacentElements =
       this.findNodesWithTheirAdjacentElements()
     const elementsWithTheirNeighbourhoods = this.findNeighbourhoods(

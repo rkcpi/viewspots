@@ -17,11 +17,3 @@ export const jsonStringToMesh = (json: string): Mesh => {
     sanityCheck
   )
 }
-
-export const jsonObjectToMesh = (json: any): Mesh => {
-  return new Mesh(
-    json.nodes,
-    json.elements,
-    json.values,
-  )
-}
